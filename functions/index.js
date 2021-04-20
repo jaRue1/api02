@@ -1,11 +1,11 @@
 const functions = require("firebase-functions")
 const express = require('express')
 const app = express()
-app.get('/test', (req,res) => {
-  res.send('it is working !')
-})
-app.get('/test2', (req,res) => {
-  res.send('this is test 2')
-})
+const {getSingleCars,getCars,newCars,updateCars,deleteCars} = require('./src/cars')
+app.get('/cars/all',getCars)
+app.get('/cars',getSingleCars)
+app.post('/cars/',newCars)
+app.patch('/cars/:carId',updateCars)
+app.delete('/cars/:carId',deleteCars)
 exports.app = functions.https.onRequest(app)
 
