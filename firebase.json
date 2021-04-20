@@ -2,8 +2,8 @@
   "hosting": {
     "public": "public",
     "rewrites":[{
-      "source":"/helloWorld",
-      "function":"helloWorld"
+      "source":"**",
+      "function":"app"
     }],
     "ignore": [
       "firebase.json",
