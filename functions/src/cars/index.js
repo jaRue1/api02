@@ -1,34 +1,57 @@
+var admin = require("firebase-admin")
 
-var admin = require("firebase-admin");
-
-var serviceAccount = require("../../credentials.json");
-let db;
+var serviceAccount = require("../../credentials.json")
+let db
 function reconnectToFirestore() {
   if (!db) {
     admin.initializeApp({
-      credential: admin.credential.cert(serviceAccount)
-    });    
-     db =  admin.firestore()
+      credential: admin.credential.cert(serviceAccount),
+    })
+    db = admin.firestore()
   }
 }
-
-exports.getCars = (req,res) => {
+exports.getCars = (req, res) => {
   reconnectToFirestore()
-  res.send('Got cars')
+  db.collection("cars")
+    .get()
+    .then((allData) => {
+      let usedCars = []
+      allData.forEach(car =>{
+        usedCars.push(car.data())
+      })
+      res.send(usedCars)
+    })
+    .catch((err) => console.log(err) )
 }
-exports.newCars = (req,res) => {
+exports.getSingleCars = (req, res) => {
   reconnectToFirestore()
-  const newData = req.body 
-  db.collection('cars').add(newData)
-  .then(res.send('New Car'))
-  .catch(error => send.status(500).send('Error creating car:' + error.message) )
-  res.send('Created new car')
+  db.collection("cars")
+    .get()
+    .then((allData) => {
+      allData.forEach(car =>{
+        // console.log(car.id," cars here =>", car.data())
+        res.send(car.data())
+      })
+    })
+    .catch((err) => console.log(err) )
+  // res.send("Got cars")
 }
-exports.updateCars = (req,res) => {
+exports.newCars = (req, res) => {
   reconnectToFirestore()
-  res.send('Updated cars')
+  const newData = req.body
+  db.collection("cars")
+    .add(newData)
+    .then(()=> this.getCars(req,res))
+    .catch((error) =>
+      send.status(500).send("Error creating car:" + error.message)
+    )
+  res.send("Created new car")
 }
-exports.deleteCars = (req,res) => {
+exports.updateCars = (req, res) => {
   reconnectToFirestore()
-  res.send('Deleted car')
+  res.send("Updated cars")
+}
+exports.deleteCars = (req, res) => {
+  reconnectToFirestore()
+  res.send("Deleted car")
 }
