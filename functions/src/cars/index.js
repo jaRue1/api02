@@ -1,7 +1,7 @@
 var admin = require("firebase-admin")
 
-var serviceAccount = require("../../credentials.json")
-let db
+let serviceAccount = require("../../credentials.json")
+let db;
 function reconnectToFirestore() {
   if (!db) {
     admin.initializeApp({
@@ -42,11 +42,18 @@ exports.newCars = (req, res) => {
   db.collection("cars")
     .add(newData)
     .then(()=> this.getCars(req,res))
-    .catch((error) =>
-      send.status(500).send("Error creating car:" + error.message)
-    )
-  res.send("Created new car")
+    .catch((error) => send.status(500).send("Error creating car:" + error.message))
 }
+exports.newMultiCars = (req, res) => {
+  reconnectToFirestore()
+  const newData = req.body
+  newData.forEach(car => {
+    db.collection("cars").add(car)
+    .catch((error) => send.status(500).send("Error creating car:" + error.message))
+  })
+  this.getCars(req,res)
+}
+
 exports.updateCars = (req, res) => {
   reconnectToFirestore()
   res.send("Updated cars")
