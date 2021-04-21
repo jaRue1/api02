@@ -1,7 +1,7 @@
 var admin = require("firebase-admin")
 
 let serviceAccount = require("../../credentials.json")
-let db;
+let db
 function reconnectToFirestore() {
   if (!db) {
     admin.initializeApp({
@@ -16,24 +16,24 @@ exports.getCars = (req, res) => {
     .get()
     .then((allData) => {
       let usedCars = []
-      allData.forEach(car =>{
+      allData.forEach((car) => {
         usedCars.push(car.data())
       })
       res.send(usedCars)
     })
-    .catch((err) => console.log(err) )
+    .catch((err) => console.log(err))
 }
 exports.getSingleCars = (req, res) => {
   reconnectToFirestore()
   db.collection("cars")
     .get()
     .then((allData) => {
-      allData.forEach(car =>{
+      allData.forEach((car) => {
         // console.log(car.id," cars here =>", car.data())
         res.send(car.data())
       })
     })
-    .catch((err) => console.log(err) )
+    .catch((err) => console.log(err))
   // res.send("Got cars")
 }
 exports.newCars = (req, res) => {
@@ -41,17 +41,24 @@ exports.newCars = (req, res) => {
   const newData = req.body
   db.collection("cars")
     .add(newData)
-    .then(()=> this.getCars(req,res))
-    .catch((error) => send.status(500).send("Error creating car:" + error.message))
+    .then(() => this.getCars(req, res))
+    .catch((error) =>
+      send.status(500).send("Error creating car:" + error.message)
+    )
 }
 exports.newMultiCars = (req, res) => {
   reconnectToFirestore()
   const newData = req.body
-  newData.forEach(car => {
-    db.collection("cars").add(car)
-    .catch((error) => send.status(500).send("Error creating car:" + error.message))
+  newData.forEach((car, index) => {
+    db.collection("cars")
+      .add(car)
+      .then(() => {
+        if (index === newData.length - 1) {
+          this.getCars(req, res)
+        }
+      })
+      .catch((error) => send.status(500).send("Error creating car:" + error.message))
   })
-  this.getCars(req,res)
 }
 
 exports.updateCars = (req, res) => {
